@@ -100,7 +100,9 @@ pip install psutil readchar
 
 Use `ls logs` to list available log files, and `tail -f logs/<name>.log` to monitor progress. 
 
-**Note:** when asked to press `ENTER`, you may need to do so a couple of times.
+...
+**Note:** When prompted to press `ENTER`, the script may require you to press it more than once (for example, after switching windows or returning focus to the terminal).
+...
 
 **Run with Python**
 
@@ -124,6 +126,7 @@ You will be prompted to log in through your browser (`http://localhost:3000`). I
 Once the Minecraft windows have loaded, the Python script will ask you to press `ENTER`.
 
 Go to the first Minecraft window that opened (the other will be minimized on macOS). Click the window and press `ENTER` to allow it to capture your inputs. Complete the structure in-game, then return to your terminal and press `ENTER` to end the session.
+
 
 
 **Training**

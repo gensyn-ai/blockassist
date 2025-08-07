@@ -37,4 +37,4 @@ const stringToJSONSchema = z.string()
         }
     })
 
-export const httpRequestErroDetailsStringSchema = stringToJSONSchema.pipe(httpRequestErrorDetailsSchema)
+export const httpRequestErrorDetailsStringSchema = stringToJSONSchema.pipe(httpRequestErrorDetailsSchema)
