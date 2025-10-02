@@ -30,7 +30,6 @@ from blockassist.episode import EpisodeRunner
 from blockassist.globals import (
     _DEFAULT_CHECKPOINT,
     _DEFAULT_EPISODES_S3_BUCKET,
-    get_identifier,
     get_logger,
     get_training_id,
 )
@@ -58,6 +57,7 @@ _ALL_STAGES = [
     Stage.UPLOAD_MODEL,
 ]
 
+
 def get_stages(cfg: DictConfig) -> list[Stage]:
     # Overrides mode
     if "stages" in cfg and cfg["stages"]:
@@ -78,12 +78,14 @@ def hf_login(cfg: DictConfig):
 
 def get_hf_repo_id(hf_token: str, training_id: str):
     username = whoami(token=hf_token)["name"]
-    return f"{username}/blockassist-bc-{training_id}"
+    return f"{username}/blockassist"
 
 
 async def _main(cfg: DictConfig):
     try:
-        logging.basicConfig(filename='logs/blockassist.log', encoding='utf-8', level=logging.DEBUG)
+        logging.basicConfig(
+            filename="logs/blockassist.log", encoding="utf-8", level=logging.DEBUG
+        )
         if cfg["mode"] == "e2e":
             _LOG.info("Starting full recording session!!")
 
@@ -136,7 +138,7 @@ async def _main(cfg: DictConfig):
                 if upload_session_episodes_only:
                     _LOG.info("Uploading session episode zips!")
                     s3_uris = zip_and_upload_episodes(
-                        get_identifier(address_eoa),
+                        address_eoa,
                         checkpoint_dir,
                         _DEFAULT_EPISODES_S3_BUCKET,
                         episode_runner.evaluate_dirs,
@@ -144,7 +146,7 @@ async def _main(cfg: DictConfig):
                 else:
                     _LOG.info("Uploading all episode zips!")
                     s3_uris = zip_and_upload_all_episodes(
-                        get_identifier(address_eoa),
+                        address_eoa,
                         checkpoint_dir,
                         _DEFAULT_EPISODES_S3_BUCKET,
                     )
@@ -166,10 +168,11 @@ async def _main(cfg: DictConfig):
                     hf_repo_id = get_hf_repo_id(hf_token, training_id)
                     num_sessions = get_total_episodes(checkpoint_dir)
                     is_telemetry_enabled = not telemetry.is_telemetry_disabled()
-                    upload_to_huggingface(
+                    git_ref = upload_to_huggingface(
                         model_path=Path(model_dir),
-                        user_id=get_identifier(address_eoa),
+                        user_id=address_eoa,
                         repo_id=hf_repo_id,
+                        address_eoa=address_eoa,
                         hf_token=hf_token,
                         chain_metadata_dict={
                             "eoa": cfg.get("address_account"),
@@ -183,6 +186,7 @@ async def _main(cfg: DictConfig):
                         hf_id=hf_repo_id,
                         num_sessions=num_sessions,
                         telemetry_enabled=is_telemetry_enabled,
+                        git_ref=git_ref,
                     )
                 else:
                     _LOG.warning("No model directory specified, skipping upload.")

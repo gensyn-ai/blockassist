@@ -1,5 +1,5 @@
 {
-    "abi": [
+  "abi": [
     {
       "inputs": [
         {
@@ -576,6 +576,87 @@
         }
       ],
       "name": "verifyHFUpload",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "trainingID",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "huggingFaceID",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "gitRef",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "numSessions",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "telemetryEnabled",
+          "type": "bool"
+        }
+      ],
+      "name": "HFUploadSubmittedWithRef",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "trainingID",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "huggingFaceID",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "gitRef",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "numSessions",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "telemetryEnabled",
+          "type": "bool"
+        }
+      ],
+      "name": "submitHFUploadWithRef",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

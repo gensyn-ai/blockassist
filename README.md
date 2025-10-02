@@ -49,10 +49,10 @@ brew install pyenv
 pyenv install 3.10
 ```
 
-**Step 5: Install `psutil` and `readchar`**
+**Step 5: Install `psutil`, `readchar`, and `rich`**
 
 ```bash
-pyenv exec pip install psutil readchar
+pyenv exec pip install psutil readchar rich
 ```
 
 ## Installation (Linux)
@@ -90,10 +90,10 @@ sudo apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadli
 pyenv install 3.10
 ```
 
-**Step 5: Install `psutil` and `readchar`**
+**Step 5: Install `psutil`, `readchar`, and `rich`**
 
 ```bash
-pip install psutil readchar
+pip install psutil readchar rich
 ```
 
 ## Run BlockAssist

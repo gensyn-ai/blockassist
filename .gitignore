@@ -213,6 +213,7 @@ __marimo__/
 ## Project
 data/base_checkpoint/evaluate*
 data/evaluate/
+data/evaluate_*.zip
 data/rllib/
 episode_runs/
 convert_runs/

@@ -11,9 +11,9 @@ fi
 ROOT="$PWD"
 
 # Kill any existing processes on port 3000
-echo "Checking for existing processes on port 3000..."
+echo "Checking for existing processes on port 3000..." >> logs/yarn_run.log
 if lsof -ti :3000 > /dev/null 2>&1; then
-    echo "Killing existing processes on port 3000..."
+    echo "Killing existing processes on port 3000..." >> logs/yarn_run.log
     kill $(lsof -ti :3000) 2>/dev/null || true
     sleep 2
 fi

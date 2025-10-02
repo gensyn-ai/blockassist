@@ -1,4 +1,5 @@
 import shutil
+import time
 import zipfile
 from pathlib import Path
 
@@ -99,6 +100,19 @@ def zip_and_upload_episodes(
 
     s3_uris = []
     for evaluate_dir in evaluate_dirs:
+        # Wait for the directory to be fully created (race condition fix)
+        max_wait_seconds = 180
+        wait_interval = 0.5
+        waited = 0
+        
+        while not evaluate_dir.exists() and waited < max_wait_seconds:
+            _LOG.info(f"Waiting for evaluation directory to be created: {evaluate_dir} (waited {waited:.1f}s/{max_wait_seconds}s)")
+            time.sleep(wait_interval)
+            waited += wait_interval
+        
+        if not evaluate_dir.exists():
+            raise FileNotFoundError(f"Evaluation directory does not exist after waiting {max_wait_seconds}s: {evaluate_dir}")
+        
         _LOG.info(f"Processing evaluation directory: {evaluate_dir}")
 
         # Create zip file of the directory

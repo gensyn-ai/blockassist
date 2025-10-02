@@ -2,31 +2,65 @@ import json
 import logging
 import os
 import signal
+import subprocess
 import sys
 import threading
 import time
 from subprocess import Popen
 from typing import Dict, Optional
+from importlib.metadata import version
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.progress import (
+    Progress,
+    TimeElapsedColumn,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+)
 
 import psutil
 import readchar
+
 
 from daemon import PROCESSES, cleanup_processes, start_log_watcher
 
 TOTAL_TIME_PLAYED = 0
 EPISODES_PLAYED = 0
+CONSOLE = Console()
+LOG_COLOR = "dim"
+HEADER_COLOR = "bold blue"
+INFO_COLOR = "cyan"
+ERROR_COLOR = "bold red"
+WARNING_COLOR = "yellow"
+SUCCESS_COLOR = "green"
+DELINEATOR_COLOR = "bold white"
+GENSYN_COLOR = "bold magenta"
+
+
+def get_version() -> str:
+    cmd = "./blockassist-venv/bin/python scripts/get_version.py"
+    process = Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    if process.returncode != 0:
+        CONSOLE.print(
+            f"Error getting version: {stderr.decode().strip()}", style=ERROR_COLOR
+        )
+        return "unknown"
+    return stdout.decode().strip()
 
 
 def create_logs_dir(clear_existing=True):
     if os.path.exists("logs") and clear_existing:
-        print("Clearing existing logs directory")
+        CONSOLE.print("Clearing existing logs directory", style=LOG_COLOR)
         cmd = "rm -rf logs"
         process = Popen(cmd, shell=True)
         ret = process.wait()
         if ret != 0:
             sys.exit(ret)
 
-    print("Creating logs directory")
+    CONSOLE.print("Creating logs directory", style=LOG_COLOR)
     cmd = "mkdir -p logs"
     process = Popen(cmd, shell=True)
     ret = process.wait()
@@ -36,14 +70,14 @@ def create_logs_dir(clear_existing=True):
 
 def create_evaluate_dir():
     if not os.path.exists("data/base_checkpoint/evaluate"):
-        print("Creating evaluate directory")
+        CONSOLE.print("Creating evaluate directory", style=LOG_COLOR)
         cmd = "mkdir -p data/base_checkpoint/evaluate"
         process = Popen(cmd, shell=True)
         ret = process.wait()
         if ret != 0:
             sys.exit(ret)
     else:
-        print("Evaluate directory already exists")
+        CONSOLE.print("Evaluate directory already exists", style=LOG_COLOR)
 
 
 def setup_venv():
@@ -122,14 +156,17 @@ def wait_for_keys(keys=_ENTER_KEYS, on_received=None):
                 on_received(char)
             break
         else:
-            print(
-                f"Unknown key pressed: {repr(char)}. Please press a valid key in ({keys}) to continue."
+            CONSOLE.print(
+                f"Unknown key pressed: {repr(char)}. Please press a valid key in ({keys}) to continue.",
+                style=WARNING_COLOR,
             )
 
 
 def send_blockassist_sigint(pid: int):
     logging.info("Running send_blockassist_sigint")
-    print("Sending SIGINT to BlockAssist process with PID:", pid)
+    CONSOLE.print(
+        f"Sending SIGINT to BlockAssist process with PID: {pid}", style=LOG_COLOR
+    )
 
     parent_process = psutil.Process(pid)
     if parent_process.is_running():
@@ -167,12 +204,12 @@ def train_blockassist(env: Optional[Dict] = None):
 def wait_for_login():
     logging.info("Running wait_for_login")
     # Extract environment variables from userData.json
-    print("Waiting for modal userData.json to be created...")
+    CONSOLE.print("Waiting for modal userData.json to be created...", style=INFO_COLOR)
     user_data_path = "modal-login/temp-data/userData.json"
     user_api_key_path = "modal-login/temp-data/userApiKey.json"
     while not os.path.exists(user_data_path):
         time.sleep(1)
-    print("Found userData.json. Proceeding...")
+    CONSOLE.print("Found userData.json. Proceeding...", style=SUCCESS_COLOR)
 
     # Read and parse the JSON file
     while True:
@@ -186,8 +223,8 @@ def wait_for_login():
             d = os.environ.copy()
 
             for k in user_data.keys():
-                d["BA_ORG_ID"] = user_data[k]['orgId']
-                d["BA_ADDRESS_EOA"] = user_data[k]['address']
+                d["BA_ORG_ID"] = user_data[k]["orgId"]
+                d["BA_ADDRESS_EOA"] = user_data[k]["address"]
                 d["PYTHONWARNINGS"] = "ignore::DeprecationWarning"
 
             for k in user_api_key.keys():
@@ -195,15 +232,14 @@ def wait_for_login():
                 d["BA_ADDRESS_ACCOUNT"] = user_api_key[k][-1]["accountAddress"]
                 return d
         except Exception as e:
-            print("Waiting...")
-            time.sleep(1)   
-
+            CONSOLE.print("Waiting...", style=INFO_COLOR)
+            time.sleep(1)
 
 
 def run():
     global TOTAL_TIME_PLAYED
     global EPISODES_PLAYED
-    print("Creating directories...")
+    CONSOLE.print("Creating directories...", style=LOG_COLOR)
     create_logs_dir(clear_existing=True)
     create_evaluate_dir()
 
@@ -215,7 +251,7 @@ def run():
     )
 
     logging.info("Running BlockAssist run.py script")
-    print(
+    CONSOLE.print(
         """
 ██████╗ ██╗      ██████╗  ██████╗██╗  ██╗
 ██╔══██╗██║     ██╔═══██╗██╔════╝██║ ██╔╝
@@ -231,19 +267,22 @@ def run():
 ██║  ██║███████║███████║██║███████║   ██║
 ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚══════╝   ╚═╝
 
-By Gensyn
-        """
+By Gensyn""",
+        style=GENSYN_COLOR,
     )
 
     if os.environ.get("HF_TOKEN") is None:
         logging.info("HF_TOKEN not found, prompting")
-        print(
-            "Please enter your Hugging Face user access token and press ENTER. If you do not have a token, please refer to"
+        CONSOLE.print(
+            "Please enter your Hugging Face user access token and press ENTER. If you do not have a token, please refer to",
+            style=INFO_COLOR,
         )
-        print()
-        print("\n    https://huggingface.co/docs/hub/en/security-tokens")
-        print()
-        print("for instructions on how to obtain one.")
+        CONSOLE.print()
+        CONSOLE.print(
+            "\n    https://huggingface.co/docs/hub/en/security-tokens", style=INFO_COLOR
+        )
+        CONSOLE.print()
+        CONSOLE.print("for instructions on how to obtain one.", style=INFO_COLOR)
 
         while True:
             hf_token = input("Hugging Face token: ").strip()
@@ -251,69 +290,84 @@ By Gensyn
                 break
 
         os.environ["HF_TOKEN"] = hf_token
-        print("✅ HF_TOKEN set successfully")
+        CONSOLE.print("✅ HF_TOKEN set successfully", style=SUCCESS_COLOR)
 
-    print("Setting up virtualenv...")
+    CONSOLE.print("Setting up virtualenv...", style=LOG_COLOR)
     setup_venv()
 
-    print("Setting up Gradle...")
+    CONSOLE.print(f"BlockAssist version: {get_version()}", style=GENSYN_COLOR)
+
+    CONSOLE.print("Setting up Gradle...", style=LOG_COLOR)
     setup_gradle()
 
-    print("Compiling Yarn...")
-
+    CONSOLE.print("Compiling Yarn...", style=LOG_COLOR)
     setup_yarn()
 
-    print("Setting up Minecraft...")
+    CONSOLE.print("Setting up Minecraft...", style=LOG_COLOR)
     start_log_watcher()
     proc_malmo = run_malmo()
 
-    print("\nLOGIN")
-    print("========")
+    CONSOLE.print(Markdown("# LOGIN"), style=HEADER_COLOR)
     if sys.platform == "darwin":
-        print(
-            "You will likely be asked to approve accessibility permissions. Please do so and, if necessary, restart the program."
+        CONSOLE.print(
+            "You will likely be asked to approve accessibility permissions. Please do so and, if necessary, restart the program.",
+            style=WARNING_COLOR,
         )
     proc_yarn = run_yarn()
     time.sleep(5)
     if not os.path.exists("modal-login/temp-data/userData.json"):
-        print(
-            "Running Gensyn Testnet login. If browser does not open automatically, please open a browser and go to http://localhost:3000 and click 'login' to continue."
+        CONSOLE.print(
+            "Running Gensyn Testnet login. If browser does not open automatically, please open a browser and go to http://localhost:3000 and click 'login' to continue.",
+            style=INFO_COLOR,
         )
-        print("Note, if it's your first time playing, also click 'log in')")
+        CONSOLE.print(
+            "Note, if it's your first time playing, also click 'log in')",
+            style=INFO_COLOR,
+        )
         run_open()
 
     env = wait_for_login()
 
-    print("\nSTART MINECRAFT")
-    print("========")
-    print(
-        "Please press ENTER when two Minecraft windows have opened. This may take up to 5 minutes to happen."
+    CONSOLE.print(Markdown("# START MINECRAFT"), style=HEADER_COLOR)
+    CONSOLE.print(
+        "Please press ENTER when two Minecraft windows have opened. This may take up to 5 minutes to happen.",
+        style=INFO_COLOR,
     )
-    print(
-        "NOTE: If one or both of the windows closes, please restart the program. You can also `tail -f logs/malmo.log` in another terminal if you suspect an error"
+    CONSOLE.print(
+        "NOTE: If one or both of the windows closes, please restart the program. You can also `tail -f logs/malmo.log` in another terminal if you suspect an error",
+        style=WARNING_COLOR,
     )
     wait_for_enter()
-    print("Enter received")
+    CONSOLE.print("Enter received", style=SUCCESS_COLOR)
 
-    print("\nINSTRUCTIONS")
-    print("========")
+    CONSOLE.print(Markdown("# INSTRUCTIONS"), style=HEADER_COLOR)
     time.sleep(1)
-    print("The goal of the game is to build the structure in front of you.")
-    print("You do this by placing or destroying blocks.")
-    print("Each building you build is a separate 'episode'")
-    print("An AI player will assist you.")
-    print("The more you play, the more the AI player learns.")
-    print("You should break red blocks and place blocks where indicated")
-    print("Click on the window and press ENTER to start playing")
-    print("Left click to break blocks, right click to place blocks")
-    print(
-        "Select an axe to break things, or various blocks, by pressing the number keys 1-9"
+    CONSOLE.print(
+        "The goal of the game is to build the structure in front of you.",
+        style=INFO_COLOR,
     )
-    print("Use the WASD keys to move around")
-    print(
-        "Once you've finished playing, press ESC, then click back on the terminal window"
+    CONSOLE.print("You do this by placing or destroying blocks.", style=INFO_COLOR)
+    CONSOLE.print("Each building you build is a separate 'episode'", style=INFO_COLOR)
+    CONSOLE.print("An AI player will assist you.", style=INFO_COLOR)
+    CONSOLE.print("The more you play, the more the AI player learns.", style=INFO_COLOR)
+    CONSOLE.print(
+        "You should break red blocks and place blocks where indicated", style=INFO_COLOR
     )
-    print("------\n")
+    CONSOLE.print(
+        "Click on the window and press ENTER to start playing", style=INFO_COLOR
+    )
+    CONSOLE.print(
+        "Left click to break blocks, right click to place blocks", style=INFO_COLOR
+    )
+    CONSOLE.print(
+        "Select an axe to break things, or various blocks, by pressing the number keys 1-9",
+        style=INFO_COLOR,
+    )
+    CONSOLE.print("Use the WASD keys to move around", style=INFO_COLOR)
+    CONSOLE.print(
+        "Once you've finished playing, press ESC, then click back on the terminal window",
+        style=INFO_COLOR,
+    )
 
     proc_blockassist = run_blockassist(env=env)
 
@@ -323,64 +377,66 @@ By Gensyn
 
     for i in range(_MAX_EPISODE_COUNT):
         # Start timer in a separate thread
-        print("\nSTARTING EPISODE {}".format(i))
+        CONSOLE.print(Markdown(f"\n## STARTING EPISODE {i}"), style=HEADER_COLOR)
         timer_running = True
         start_time = time.time()
 
-        def timer_display():
-            while timer_running:
-                elapsed = int(time.time() - start_time)
-                hours = elapsed // 3600
-                minutes = (elapsed % 3600) // 60
-                seconds = elapsed % 60
-                print(
-                    f"\r⏱️  Recording time: {hours:02d}:{minutes:02d}:{seconds:02d}",
-                    end="",
-                    flush=True,
-                )
-                time.sleep(1)
-
-        timer_thread = threading.Thread(target=timer_display, daemon=True)
-        timer_thread.start()
-
-        def timer_end(key):
-            nonlocal timer_running
-            timer_running = False
-
-        print(
-            f"\n[{i}] Please wait for the mission to load up on your Minecraft window. Press ENTER when you have finished recording your episode. **You may have to press it multiple times**"
+        CONSOLE.print(
+            f"\n[{i}] Please wait for the mission to load up on your Minecraft window. Press ENTER when you have finished recording your episode. **You may have to press it multiple times**",
+            style=INFO_COLOR,
         )
-        wait_for_enter(timer_end)
-        print(f"\n[{i}] Enter received")
 
-        print(f"\n[{i}] Stopping episode recording")
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]Recording episode"),
+            BarColumn(),
+            TaskProgressColumn(),
+            TimeElapsedColumn(),
+            console=CONSOLE,
+        ) as progress:
+            task = progress.add_task("Recording episode", total=None)
+
+            wait_for_enter()
+            progress.stop()
+
+        CONSOLE.print(f"\n[{i}] Enter received", style=SUCCESS_COLOR)
+
+        CONSOLE.print(f"\n[{i}] Stopping episode recording", style=INFO_COLOR)
         send_blockassist_sigint(proc_blockassist.pid)
         TOTAL_TIME_PLAYED += int(time.time() - start_time)
         EPISODES_PLAYED += 1
 
-    print("Stopping Malmo")
+    CONSOLE.print("Stopping Malmo", style=INFO_COLOR)
     proc_malmo.kill()
     proc_malmo.wait()
 
-    print("Waiting for BlockAssist to stop - this might take a few minutes")
+    CONSOLE.print(
+        "Waiting for BlockAssist to stop - this might take a few minutes",
+        style=INFO_COLOR,
+    )
     proc_blockassist.wait()
 
-    print("\nMODEL TRAINING")
-    print("========")
-    print("Your assistant is now training on the gameplay you recorded.")
-    print(
-        "This may take a while, depending on your hardware. Please keep this window open until you see 'Training complete'."
+    CONSOLE.print(Markdown("# MODEL TRAINING"), style=HEADER_COLOR)
+    CONSOLE.print(
+        "Your assistant is now training on the gameplay you recorded.", style=INFO_COLOR
     )
-    print("Running training")
+    CONSOLE.print(
+        "This may take a while, depending on your hardware. Please keep this window open until you see 'Training complete'.",
+        style=INFO_COLOR,
+    )
+    CONSOLE.print("Running training", style=INFO_COLOR)
     proc_train = train_blockassist(env=env)
     proc_train.wait()
 
-    print("Training complete")
+    CONSOLE.print("Training complete", style=SUCCESS_COLOR)
 
-    print("\nUPLOAD TO HUGGINGFACE AND SMART CONTRACT")
-    print("========")
+    CONSOLE.print(
+        Markdown("# UPLOAD TO HUGGINGFACE AND SMART CONTRACT"), style=HEADER_COLOR
+    )
     # Monitor blockassist-train.log for HuggingFace upload confirmation and transaction hash
-    print("Checking for upload confirmation and transaction hash...")
+    CONSOLE.print(
+        "Checking for upload confirmation and transaction hash...", style=LOG_COLOR
+    )
     train_log_path = "logs/blockassist-train.log"
     upload_confirmed = False
     transaction_hash = None
@@ -409,66 +465,85 @@ By Gensyn
                         )[1].split(" ")
                         hf_path = line_elems[0].strip()
                         hf_size = line_elems[3].strip() + " " + line_elems[4].strip()
-                        print("✅ " + line)
+                        CONSOLE.print("✅ " + line, style=SUCCESS_COLOR)
                         upload_confirmed = True
                     elif "HF Upload API response:" in line and not transaction_hash:
-                        print("🔗 " + line)
+                        CONSOLE.print("🔗 " + line, style=WARNING_COLOR)
                         transaction_hash = line
 
             # If we found both, we can stop monitoring
             if upload_confirmed and transaction_hash:
-                print(
-                    "Copy your HuggingFace model path (e.g. 'block-fielding/bellowing_pouncing_horse_1753796381') and check for it here:\nhttps://gensyn-testnet.explorer.alchemy.com/address/0xE2070109A0C1e8561274E59F024301a19581d45c?tab=logs"
+                CONSOLE.print(
+                    "Copy your HuggingFace model path (e.g. 'block-fielding/bellowing_pouncing_horse_1753796381') and check for it here:\nhttps://gensyn-testnet.explorer.alchemy.com/address/0xE2070109A0C1e8561274E59F024301a19581d45c?tab=logs",
+                    style=INFO_COLOR,
                 )
                 break
 
         except Exception as e:
-            print(f"Error reading log file: {e}")
+            CONSOLE.print(f"Error reading log file: {e}", style=ERROR_COLOR)
             break
 
     # If we didn't find the logs after 30 seconds
     if not upload_confirmed and not transaction_hash:
-        print(
-            "⚠️ No upload confirmation or transaction hash found in blockassist-train.log"
+        CONSOLE.print(
+            "⚠️ No upload confirmation or transaction hash found in blockassist-train.log",
+            style=ERROR_COLOR,
         )
     elif not upload_confirmed:
-        print("⚠️ No HuggingFace upload confirmation found in blockassist-train.log")
+        CONSOLE.print(
+            "⚠️ No HuggingFace upload confirmation found in blockassist-train.log",
+            style=ERROR_COLOR,
+        )
     elif not transaction_hash:
-        print("⚠️ No transaction hash found in blockassist-train.log")
+        CONSOLE.print(
+            "⚠️ No transaction hash found in blockassist-train.log", style=ERROR_COLOR
+        )
 
-    print("\nSHUTTING DOWN")
-    print("========")
-    print("Stopping Yarn")
+    CONSOLE.print(Markdown("# SHUTTING DOWN"), style=HEADER_COLOR)
+    CONSOLE.print("Stopping Yarn", style=LOG_COLOR)
     proc_yarn.kill()
 
-    print(f"🎉 SUCCESS! Your BlockAssist session has completed successfully!")
-    print(f"")
-    print(f"- Your gameplay was recorded and analyzed")
-    print(f"- An AI model was trained on your building patterns")
-    print(f"- The model was successfully uploaded to Hugging Face")
-    print(f"- Your work helps train better AI assistants ")
-    print(f"")
-    print(f"Stats:")
-    print(f"")
-    print(f"- Episodes recorded: {EPISODES_PLAYED}")
-    print(
-        f"- Total gameplay time: {TOTAL_TIME_PLAYED // 60}m {TOTAL_TIME_PLAYED % 60}s"
+    CONSOLE.print(
+        Markdown(f"# 🎉 SUCCESS! Your BlockAssist session has completed successfully!"),
+        style=SUCCESS_COLOR,
     )
-    print(f"- Model trained and uploaded: {hf_path}")
-    print(f"- Model size: {hf_size}")
-    print(f"")
-    print(f"🚀What to do next:")
-    print(f"")
-    print(f"")
-    print(
-        f"- Run BlockAssist again to improve your performance (higher completion %, faster time)."
+    CONSOLE.print(f"")
+    CONSOLE.print(f"- Your gameplay was recorded and analyzed", style=INFO_COLOR)
+    CONSOLE.print(
+        f"- An AI model was trained on your building patterns", style=INFO_COLOR
     )
-    print(f"- Check your model on Hugging Face: https://huggingface.co/{hf_path}")
-    print(
-        f"- Screenshot your stats, record your gameplay, and share with the community on X (https://x.com/gensynai) or Discord (https://discord.gg/gensyn)"
+    CONSOLE.print(
+        f"- The model was successfully uploaded to Hugging Face", style=INFO_COLOR
     )
-    print(f"")
-    print(f"Thank you for contributing to BlockAssist!")
+    CONSOLE.print(f"- Your work helps train better AI assistants ", style=INFO_COLOR)
+    CONSOLE.print(f"")
+    CONSOLE.print(f"Stats:", style=INFO_COLOR)
+    CONSOLE.print(f"")
+    CONSOLE.print(f"- Episodes recorded: {EPISODES_PLAYED}", style=INFO_COLOR)
+    CONSOLE.print(
+        f"- Total gameplay time: {TOTAL_TIME_PLAYED // 60}m {TOTAL_TIME_PLAYED % 60}s",
+        style=INFO_COLOR,
+    )
+    CONSOLE.print(f"- Model trained and uploaded: {hf_path}", style=INFO_COLOR)
+    CONSOLE.print(f"- Model size: {hf_size}", style=INFO_COLOR)
+    CONSOLE.print(f"")
+    CONSOLE.print(f"🚀What to do next:", style=INFO_COLOR)
+    CONSOLE.print(f"")
+    CONSOLE.print(f"")
+    CONSOLE.print(
+        f"- Run BlockAssist again to improve your performance (higher completion %, faster time).",
+        style=INFO_COLOR,
+    )
+    CONSOLE.print(
+        f"- Check your model on Hugging Face: https://huggingface.co/{hf_path}",
+        style=INFO_COLOR,
+    )
+    CONSOLE.print(
+        f"- Screenshot your stats, record your gameplay, and share with the community on X (https://x.com/gensynai) or Discord (https://discord.gg/gensyn)",
+        style=INFO_COLOR,
+    )
+    CONSOLE.print(f"")
+    CONSOLE.print(f"Thank you for contributing to BlockAssist!", style=INFO_COLOR)
 
 
 if __name__ == "__main__":

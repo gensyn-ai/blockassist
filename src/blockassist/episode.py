@@ -10,7 +10,6 @@ from blockassist import telemetry
 from blockassist.globals import (
     _DEFAULT_CHECKPOINT,
     _MAX_EPISODE_COUNT,
-    get_identifier,
     get_logger,
 )
 from blockassist.goals.generator import BlockAssistGoalGenerator
@@ -104,7 +103,7 @@ class EpisodeRunner:
 
         duration_ms = int((time.time() - self.start_time) * 1000)
         telemetry.push_telemetry_event_session(
-            duration_ms, get_identifier(self.address_eoa), self.get_last_goal_percentage_min(result)
+            duration_ms, self.address_eoa, self.get_last_goal_percentage_min(result)
         )
 
     def before_session(self):

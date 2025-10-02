@@ -9,12 +9,13 @@ export async function POST(request: Request) {
         huggingFaceId: string;
         numSessions: bigint;
         telemetryEnabled: boolean;
+        gitRef: string;
     } = await request.json().catch((err) => {
         console.error(err);
         console.log(body);
 
         return NextResponse.json(
-            { error: " bad request generic "},
+            { error: " bad request generic " },
             { status: 400 },
         );
     })
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
 
     if (!body.orgId) {
         return NextResponse.json(
-            { error: " bad request orgId "},
+            { error: " bad request orgId " },
             { status: 400 },
         );
     }
@@ -32,28 +33,28 @@ export async function POST(request: Request) {
         const user = getUser(body.orgId);
         if (!user) {
             return NextResponse.json(
-                { error: " user not found "},
+                { error: " user not found " },
                 { status: 404 },
             );
         }
 
         const apiKey = getLatestApiKey(body.orgId);
         console.log("API Key retrieved:", apiKey ? { activated: apiKey.activated, hasFields: apiKey.activated ? !!apiKey.accountAddress : false } : "null");
-        
+
         if (!apiKey?.activated) {
             return NextResponse.json(
-                { error: " api key not found or not activated "},
+                { error: " api key not found or not activated " },
                 { status: 500 },
             );
         }
 
         const { accountAddress, privateKey, initCode, deferredActionDigest } = apiKey;
-        
+
         // Validate that all required fields are present
         if (!accountAddress || !privateKey || !initCode || !deferredActionDigest) {
             console.error("Missing required API key fields:", { accountAddress, privateKey, initCode, deferredActionDigest });
             return NextResponse.json(
-                { error: " api key missing required fields "},
+                { error: " api key missing required fields " },
                 { status: 500 },
             );
         }
@@ -70,7 +71,8 @@ export async function POST(request: Request) {
             trainingId: body.trainingId,
             huggingFaceId: body.huggingFaceId,
             numSessions: body.numSessions,
-            telemetryEnabled: body.telemetryEnabled
+            telemetryEnabled: body.telemetryEnabled,
+            gitRef: body.gitRef
         });
 
         const userOperationResponse = await userOperationHandler({
@@ -78,8 +80,8 @@ export async function POST(request: Request) {
             privateKey,
             deferredActionDigest,
             initCode,
-            functionName: "submitHFUpload",
-            args: [accountAddress, body.trainingId, body.huggingFaceId, body.numSessions, body.telemetryEnabled],
+            functionName: "submitHFUploadWithRef",
+            args: [accountAddress, body.trainingId, body.huggingFaceId, body.gitRef, body.numSessions, body.telemetryEnabled],
         });
 
         return userOperationResponse;

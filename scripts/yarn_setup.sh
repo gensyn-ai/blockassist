@@ -16,10 +16,10 @@ if [ ! -d .next ]; then
     ### Setup environment configuration
     setup_environment
 
-    echo "Installing dependencies..."
+    echo "Installing dependencies..." >> logs/yarn_setup.log
     yarn install --immutable
 
-    echo "Building server..."
+    echo "Building server..." >> logs/yarn_setup.log
     yarn build
 
 fi

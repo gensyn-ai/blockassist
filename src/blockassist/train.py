@@ -13,7 +13,6 @@ from blockassist import telemetry
 from blockassist.data import get_total_episodes
 from blockassist.globals import (
     _DEFAULT_CHECKPOINT,
-    get_identifier,
     get_logger,
 )
 from blockassist.goals.generator import BlockAssistGoalGenerator
@@ -97,7 +96,7 @@ class TrainingRunner:
         duration_ms = int((self.end_time - self.start_time) * 1000)
         telemetry.push_telemetry_event_trained(
             duration_ms,
-            get_identifier(self.address_eoa),
+            self.address_eoa,
             get_total_episodes(self.checkpoint_dir),
         )
         self.training_ended.set()
