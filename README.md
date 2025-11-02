@@ -6,14 +6,32 @@
 
 </div>
 
-**BlockAssist** is an AI assistant that learns from its user’s actions in Minecraft. The assistant appears in-game with you, starting with only basic knowledge of the game’s commands. As you play, it learns how to assist you in building, learning directly from your actions. It shows an early demo of _assistance learning_ - a new paradigm for aligning agents to human preferences across domains.
+**BlockAssist** is an AI assistant that learns from its user’s actions in Minecraft. The assistant appears in-game with you, starting with only basic knowledge of the game’s commands. As you play, it learns how to assist you in building, learning directly from your actions. It shows an early demo of _assistance learning_ — a new paradigm for aligning agents to human preferences across domains.
 
-Steps:
+## Quick Start
 1. Follow setup instructions below
-2. Play Minecraft episodes and complete the building goal in the shortest time possible.  This will help train the best assistant models.
+2. Play Minecraft episodes and complete the building goal in the shortest time possible. This will help train the best assistant models.
 3. Share your progress with the community by posting your gameplay videos, stats, and Hugging Face uploads on Discord and X. Track your participation on the leaderboard.
 
 **You do not need a copy of Minecraft to play! BlockAssist includes a free version.**
+
+## Table of Contents
+- [BlockAssist](#blockassist)
+  - [Quick Start](#quick-start)
+  - [Table of Contents](#table-of-contents)
+  - [Installation (macOS)](#installation-macos)
+  - [Installation (Linux)](#installation-linux)
+  - [Run BlockAssist](#run-blockassist)
+    - [Run with Python](#run-with-python)
+    - [Hugging Face Token](#hugging-face-token)
+    - [Gensyn Testnet login](#gensyn-testnet-login)
+    - [Play Minecraft](#play-minecraft)
+    - [Training](#training)
+    - [Review logs](#review-logs)
+  - [Configuration](#configuration)
+  - [Testing \& Contributing](#testing--contributing)
+    - [Linting / Testing](#linting--testing)
+  - [Telemetry](#telemetry)
 
 ## Installation (macOS)
 
@@ -102,39 +120,39 @@ Use `ls logs` to list available log files, and `tail -f logs/<name>.log` to moni
 
 **Note:** when asked to press `ENTER`, you may need to do so a couple of times.
 
-**Run with Python**
+### Run with Python
 
 * On macOS: `pyenv exec python run.py`
 * On Linux: `python run.py`
 
 The program will install additional dependencies as required. Follow any prompts and approve any requests.
 
-**Hugging Face Token**
+### Hugging Face Token
 
 You will be asked to enter a [Hugging Face](https://huggingface.co) API token. Follow [these instructions](https://huggingface.co/docs/hub/en/security-tokens) to generate one with **Write** access.
 
 
-**Gensyn Testnet login**
+### Gensyn Testnet login
 
 You will be prompted to log in through your browser (`http://localhost:3000`). If you have previously logged in, this step will be skipped. Otherwise, use the browser window that opens to log in.
 
 
-**Play Minecraft**
+### Play Minecraft
 
 Once the Minecraft windows have loaded, the Python script will ask you to press `ENTER`.
 
 Go to the first Minecraft window that opened (the other will be minimized on macOS). Click the window and press `ENTER` to allow it to capture your inputs. Complete the structure in-game, then return to your terminal and press `ENTER` to end the session.
 
 
-**Training**
+### Training
 
 A model will now be trained and submitted to Hugging Face and to Gensyn’s smart contract.
 
-**Review logs**
+### Review logs
 
 If you reach this stage in the logging window and can see a transaction in the block explorer, your submission has succeeded.
 
-Logging window:
+Example log entry:
 
 ```
 [2025-07-28 05:03:48,955][blockassist.globals][INFO] - Successfully uploaded model to HuggingFace: h-grieve/blockassist-bc-bellowing_pouncing_horse_1753675374 with size 20.00 MB
