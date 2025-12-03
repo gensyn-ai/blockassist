@@ -6,6 +6,8 @@
 
 </div>
 
+> **BlockAssist Documentation**: For platform-specific installation guides, step-by-step walkthroughs on training models, and uploading to Hugging Face and Gensyn Testnet, visit our [official documentation](https://docs.gensyn.ai/testnet/blockassist).
+
 **BlockAssist** is an AI assistant that learns from its user’s actions in Minecraft. The assistant appears in-game with you, starting with only basic knowledge of the game’s commands. As you play, it learns how to assist you in building, learning directly from your actions. It shows an early demo of _assistance learning_ - a new paradigm for aligning agents to human preferences across domains.
 
 Steps:
