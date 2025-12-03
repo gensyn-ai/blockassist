@@ -3,7 +3,7 @@
 This directory contains the structures that are selected from. They are grouped into `train` and `test` subsets and are selected automatically at runtime. Difficulty is an informal guide to relative effort/size.
 
 ## Train set (16 incl. legacy)
-| Name | Difficulty | Size (H×W×D) | Style / Notes |
+| Name | Difficulty | Size (H×W×D) | Description |
 | --- | --- | --- | --- |
 | arch_bridge | Easy | 4×5×13 | Small wooden walkway with a gentle arch. |
 | lakeside_pier | Easy | 5×4×12 | Narrow dock on log supports. |
@@ -23,7 +23,7 @@ This directory contains the structures that are selected from. They are grouped 
 | workdir.2018-08-10-20:57:24.ip-172-31-0-48 | Legacy | 7×15×15 | Original bundled structure. |
 
 ## Test set (6 incl. legacy)
-| Name | Difficulty | Size (H×W×D) | Style / Notes |
+| Name | Difficulty | Size (H×W×D) | Description |
 | --- | --- | --- | --- |
 | observatory_dome | Medium | 9×11×11 | Stone base with a glass dome. |
 | spiral_tower | Hard | 12×7×7 | Stone tower with interior spiral path. |
