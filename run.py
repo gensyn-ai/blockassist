@@ -2,12 +2,14 @@ import argparse
 import json
 import logging
 import os
+import random
 import signal
 import subprocess
 import sys
 import threading
 import time
 from subprocess import Popen
+from pathlib import Path
 from typing import Dict, Optional
 from dataclasses import dataclass
 from importlib.metadata import version
@@ -172,6 +174,17 @@ def wait_for_keys(keys=_ENTER_KEYS, on_received=None):
                 f"Unknown key pressed: {repr(char)}. Please press a valid key in ({keys}) to continue.",
                 style=WARNING_COLOR,
             )
+
+
+def select_structure(goal_set: str) -> Optional[str]:
+    """Pick a house ID from the requested subset if available."""
+    houses_dir = Path("data") / "craftassist" / "houses" / goal_set
+    try:
+        candidates = sorted(d.name for d in houses_dir.iterdir() if d.is_dir())
+    except FileNotFoundError:
+        return None
+
+    return random.choice(candidates) if candidates else None
 
 
 def send_blockassist_sigint(pid: int):
@@ -343,6 +356,14 @@ By Gensyn""",
         run_open()
 
     env = wait_for_login()
+    goal_set = os.environ.get("BA_GOAL_SET", "train")
+    selected_house = os.environ.get("BA_HOUSE_ID") or select_structure(goal_set)
+    env["BA_GOAL_SET"] = goal_set
+    if selected_house:
+        env["BA_HOUSE_ID"] = selected_house
+        logging.info(f"Selected structure '{selected_house}' from subset '{goal_set}'")
+    else:
+        logging.info(f"No structure found for subset '{goal_set}', using generator default")
 
     CONSOLE.print(Markdown("# START MINECRAFT"), style=HEADER_COLOR)
     CONSOLE.print(
@@ -357,6 +378,16 @@ By Gensyn""",
     CONSOLE.print("Enter received", style=SUCCESS_COLOR)
 
     CONSOLE.print(Markdown("# INSTRUCTIONS"), style=HEADER_COLOR)
+    if selected_house:
+        CONSOLE.print(
+            f"Structure for this episode: {selected_house} (subset: {goal_set})",
+            style=INFO_COLOR,
+        )
+    else:
+        CONSOLE.print(
+            f"Structure selection: none found for subset '{goal_set}', using generator default.",
+            style=WARNING_COLOR,
+        )
     time.sleep(1)
     CONSOLE.print(
         "The goal of the game is to build the structure in front of you.",
