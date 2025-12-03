@@ -15,6 +15,8 @@ Steps:
 
 **You do not need a copy of Minecraft to play! BlockAssist includes a free version.**
 
+Structure catalog (train/test builds): `data/craftassist/houses/README.md`
+
 ## Installation (macOS)
 
 *You only need to run these once per computer.*
