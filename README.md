@@ -6,7 +6,7 @@
 
 </div>
 
-**BlockAssist** is an AI assistant that learns from its user’s actions in Minecraft. The assistant appears in-game with you, starting with only basic knowledge of the game’s commands. As you play, it learns how to assist you in building, learning directly from your actions. It shows an early demo of _assistance learning_ - a new paradigm for aligning agents to human preferences across domains.
+**BlockAssist** is an AI assistant that learns from its user’s actions in Minecraft. The assistant appears in-game with you, starting with only basic knowledge of the game’s commands. As you play, it learns how to assist you in building, drawing from a rotating mix of curated structures—from cozy cottages and towers to greenhouses, docks, and domes. It shows an early demo of _assistance learning_ - a new paradigm for aligning agents to human preferences across domains.
 
 Steps:
 1. Follow setup instructions below
@@ -15,7 +15,7 @@ Steps:
 
 **You do not need a copy of Minecraft to play! BlockAssist includes a free version.**
 
-Structure catalog (train/test builds): `data/craftassist/houses/README.md`
+Browse the current structure roster (train/test builds): `data/craftassist/houses/README.md`
 
 ## Installation (macOS)
 
