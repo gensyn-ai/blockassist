@@ -10,7 +10,7 @@ name = "blockassist"
 description = "Distributed experiments built using the MBAG multiagent environment (https://github.com/cassidylaidlaw/minecraft-building-assistance-game)."
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
   "aiofiles",
   "boto3",
