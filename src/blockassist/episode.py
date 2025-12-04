@@ -1,4 +1,5 @@
 import asyncio
+import os
 import time
 from pathlib import Path
 
@@ -21,8 +22,8 @@ ex.observers.append(FileStorageObserver.create("episode_runs"))
 @ex.named_config
 def blockassist():
     num_simulations = 1  # noqa: F841
-    goal_set = "test"
-    house_id = None
+    goal_set = os.environ.get("BA_GOAL_SET", "train")
+    house_id = os.environ.get("BA_HOUSE_ID")
 
     env_config_updates = {  # noqa: F841
         "num_players": 2,
