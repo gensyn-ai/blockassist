@@ -2,7 +2,7 @@
 
 This directory contains the structures that are selected from. They are grouped into `train` and `test` subsets and are selected automatically at runtime. Difficulty is an informal guide to relative effort/size.
 
-## Train set (16 incl. legacy)
+## Train set (12 incl. legacy)
 | Name | Difficulty | Size (H×W×D) | Description |
 | --- | --- | --- | --- |
 | treehouse_platform | Easy | 9×9×9 | Log trunk with a raised plank deck and railing. |
@@ -18,7 +18,7 @@ This directory contains the structures that are selected from. They are grouped 
 | modern_loft | Hard | 8×12×10 | Glass-heavy loft with plank top. |
 | workdir.2018-08-10-20:57:24.ip-172-31-0-48 | Legacy | 7×15×15 | Original bundled structure. |
 
-## Test set (6 incl. legacy)
+## Test set (4 incl. legacy)
 | Name | Difficulty | Size (H×W×D) | Description |
 | --- | --- | --- | --- |
 | observatory_dome | Medium | 9×11×11 | Stone base with a glass dome. |
