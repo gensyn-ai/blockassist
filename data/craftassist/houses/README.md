@@ -26,4 +26,4 @@ This directory contains the structures that are selected from. They are grouped 
 | harbor_warehouse | Hard | 7×8×16 | Long timber storage bay with beam supports. |
 | workdir.2018-08-18-01:46:43.ip-172-31-12-95 | Legacy | 14×11×14 | Original bundled structure. |
 
-To lock to a specific build, set `house_id` in the goal generator config; otherwise selection is randomized within the subset.
+To lock to a specific build, set a local environment variable called `BA_HOUSE_ID` to the name of the structure you'd like to build; otherwise selection is randomized within the subset.
