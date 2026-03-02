@@ -1,5 +1,7 @@
 # BlockAssist
 
+> **Note: As we shift focus to Mainnet, we've stopped tracking new BlockAssist participation on Testnet. All historical data remains on-chain.**
+
 <div align="center">
 
 ![gen-blockassit-gh-header](splash.png)
