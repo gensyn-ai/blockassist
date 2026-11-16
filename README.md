@@ -186,5 +186,3 @@ This repository uploads telemetry to Gensyn services. To disable telemetry, expo
 ```bash
 export DISABLE_TELEMETRY=1
 ```
-
-**Note**: If you turn off telemetry, your contributions may not be counted towards the [BlockAssist leaderboard](https://dashboard.gensyn.ai).
